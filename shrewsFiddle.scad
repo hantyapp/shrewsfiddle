@@ -5,11 +5,12 @@ $fa=3; // set this to a lowe number for better edges as the cost of rendering ti
 
 // Variables
 materialWidth=5; // The sheet thickness Not Actuall relevent
-numScrewsAroundHole=12; // How many screws to put around each cuff
-wristSize=70; // The diameter of the wrist cuffs
+numScrewsAroundNeck=12; // How many screws to put around each cuff
+numScrewsAroundWrist=6; // How many screws to put around each cuff
+wristSize=58; // The diameter of the wrist cuffs
 wristDistance=30; // The distance from the edges of the wrists
-neckSize=165; // The diameter of the neck cuff
-collarWidth=30;//wristDistance * 2; // The collar width, making it wristDistance * 2 will make the screw holes meet, and looks nice
+neckSize=135; // The diameter of the neck cuff
+collarWidth=20;//wristDistance * 2; // The collar width, making it wristDistance * 2 will make the screw holes meet, and looks nice
 midLen=160; // The distance from the edge of the necck collar. to the first wrist collar
 screwDiameter=4; // The diameter of the screws to be used
 screwSpacingOffsetAngle=45; // Where to offset the orgin of the screw from
@@ -18,40 +19,39 @@ lockDiameter=6; // Diameter of the lock hole, usually the padlock shank diamter;
 layerSpacing=24; // How much spce to leave between each layer in the final render
 splitSpacing=2; // How much space to leave between each half
 
+// Calculated dimensions
+totalLen = collarWidth + neckSize + collarWidth + midLen + collarWidth + wristSize + wristDistance + collarWidth;
+
+
+/*
+ * h = Hinge
+ * L = Left
+ * l = Lip
+ * L = Left
+ * t = Tab
+ * L = Left
+ */
+
 hLlLtL();
 
 translate([0,neckSize+collarWidth*2 + (layerSpacing/2),0])
     {
-    rotate([180,0,0])
-    {
-        hLlLtL();
-    }
+    //rotate([180,0,0])
+    //{
+        hRlRtR();
+    //}
 }
+
 translate([0,(neckSize+collarWidth*2 + (layerSpacing/2))*2,0])
 {
     rotate([0,0,0])
     {
-        hLlRtR();
-    }
-}
-translate([0,(neckSize+collarWidth*2 + (layerSpacing/2))*3,0])
-{
-    rotate([180,0,0])
-    {
         hLlLtL();
     }
 }
-
-translate([0,(neckSize+collarWidth*2 + (layerSpacing/2))*4,0])
-{
-    rotate([0,0,0])
-    {
-        hLlLtL();
-    }
-}
-
 module hLlLtL()
 {
+    
     translate([0,-(splitSpacing/2),0])
     {
         difference()
@@ -156,11 +156,53 @@ module hLlRtR()
                 baseHalf("left");
                 midTab();
                 lockTab();
+                hingeClean();
+                hingeTab();
             }
             union()
             {
-                hingeClean();
+                
+                
+                lockHole();
+            }
+        }
+    }
+}
+
+module hRlRtR()
+{    
+    translate([0,-(splitSpacing/2),0])
+    {
+        difference()
+        {
+            union()
+            {
+                baseHalf("right");
+            }
+            union()
+            {
+                hingeCleanB();
                 hingeTab();
+                lockTab();
+                midTab();
+                lockCleanB();
+            }
+        }
+    }
+    translate([0,(splitSpacing/2),0])
+    {
+        difference()
+        {
+            union()
+            {
+                baseHalf("left");
+                midTab();
+                lockTab();
+                hingeTab();
+            }
+            union()
+            {
+                hingeHole();
                 lockHole();
             }
         }
@@ -177,7 +219,7 @@ module hingeHole()
 
 module lockHole()
 {
-    translate([(neckSize/2 + collarWidth/2 + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth*2),0,0])
+    translate([(neckSize/2 + collarWidth + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth*2),0,0])
     {
         circle(d=lockDiameter);
     }
@@ -188,7 +230,7 @@ module baseHalf(side)
     difference()
     {
         baseShape();
-        cubeX = neckSize + (wristSize*2) + midLen + (collarWidth*5) + wristDistance;
+        cubeX = neckSize + (wristSize*2) + midLen + (collarWidth*6) + wristDistance;
         cubeY = neckSize/2+collarWidth;
         transY = side=="left" ? cubeY : 0;
         translate([-(neckSize/2 + collarWidth),-transY,0])
@@ -214,9 +256,18 @@ module hingeClean()
         square([collarWidth*2, collarWidth/3.5]);
     }
 }
+
+module hingeCleanB()
+{
+    translate([-(neckSize/2 + collarWidth),-3,0])
+    {
+        square([collarWidth*2, collarWidth/3.5]);
+    }
+}
+
 module lockTab()
 {
-    translate([(neckSize/2 + collarWidth/2 + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth*2),0,0])
+    translate([(neckSize/2 + collarWidth + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth*2),0,0])
     {
         circle(d=collarWidth);
     }
@@ -224,17 +275,17 @@ module lockTab()
 
 module lockClean()
 {
-    translate([(neckSize/2 + collarWidth/2 + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth),0,0])
+    translate([(neckSize/2 + collarWidth + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth),0,0])
     {
-        square([collarWidth*2, collarWidth/3.5]);
+        square([collarWidth*1.5, collarWidth/3]);
     }
 }
 
 module lockCleanB()
 {
-    translate([(neckSize/2 + collarWidth/2 + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth),-collarWidth/3.5,0])
+    translate([(neckSize/2 + collarWidth + midLen + collarWidth + (wristSize * 2) + wristDistance + collarWidth),-collarWidth/3.5,0])
     {
-        square([collarWidth*2, collarWidth/3.5]);
+        square([collarWidth*1.5, collarWidth/3]);
     }
 }
 
@@ -291,7 +342,7 @@ module collar()
 module neckHole (neckSize) 
 {
     circle( d=neckSize);
-    screwHoles(neckSize/2, collarWidth, numScrewsAroundHole, screwDiameter);
+    screwHoles(neckSize/2, collarWidth, numScrewsAroundNeck, screwDiameter);
 }
 
 module neckCollar (neckSize, collarWidth) 
@@ -299,21 +350,21 @@ module neckCollar (neckSize, collarWidth)
     circle( d=neckSize+collarWidth*2);
 }
 
-module wristHoles (wristSize, wristDistance)
+module wristHoles ()
 {
     translate([0 - (wristDistance + (wristSize / 2)),0,0])
     {
         circle( d=wristSize);
-        screwHoles(wristSize / 2, collarWidth, numScrewsAroundHole, screwDiameter);
+        screwHoles(wristSize / 2, collarWidth, numScrewsAroundWrist, screwDiameter);
     }
     translate([wristDistance + (wristSize / 2),0,0])
     {
         circle( d=wristSize);
-        screwHoles(wristSize / 2, collarWidth, numScrewsAroundHole, screwDiameter);
+        screwHoles(wristSize / 2, collarWidth, numScrewsAroundWrist, screwDiameter);
     }
 }
 
-module wristCollar (wristSize, wristDistance, collarWidth)
+module wristCollar ()
 {
     translate([0 - (wristDistance + (wristSize / 2)),0,0])
     {
